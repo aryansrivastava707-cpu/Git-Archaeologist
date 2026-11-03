@@ -1,6 +1,8 @@
 import os
+import json
 import shutil
 import subprocess
+import sys
 import tempfile
 import unittest
 
@@ -38,6 +40,23 @@ class GitArchaeologistTest(unittest.TestCase):
         factor, _, _ = ga.bus_factor(commits)
         self.assertEqual(factor, 1)  # Asha owns almost every changed line
         self.assertIn("Bus factor", ga.render(self.dir, 3))
+
+    def test_dashboard_payload_is_json_ready(self):
+        self.commit("Asha", "core.py", "one\ntwo\n")
+        report = ga.structured_report(self.dir, 3)
+        self.assertEqual(report["commit_count"], 1)
+        self.assertEqual(report["hotspots"][0]["path"], "core.py")
+        self.assertEqual(len(report["work_rhythm"]), 7)
+
+    def test_cli_writes_dashboard_json(self):
+        self.commit("Asha", "core.py", "one\ntwo\n")
+        output = os.path.join(self.dir, "analysis.json")
+        script = os.path.join(os.path.dirname(__file__), "git_archaeologist.py")
+        subprocess.run([sys.executable, script, self.dir, "--json", output], check=True,
+                       capture_output=True, text=True)
+        with open(output, encoding="utf-8") as file:
+            report = json.load(file)
+        self.assertEqual(report["hotspots"][0]["path"], "core.py")
 
 
 if __name__ == "__main__":

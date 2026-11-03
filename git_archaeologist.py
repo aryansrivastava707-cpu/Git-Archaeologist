@@ -7,6 +7,8 @@ nobody has touched for a long time. Standard library only; needs `git` on PATH.
 import argparse
 import collections
 import datetime as dt
+import json
+import os
 import subprocess
 import sys
 
@@ -121,12 +123,46 @@ def render(repo, top):
     return "\n".join(lines)
 
 
+def structured_report(repo, top=8):
+    """Return the same analysis as JSON-ready data for dashboards and scripts."""
+    commits = load_commits(repo)
+    if not commits:
+        raise ValueError("No commits found.")
+    factor, authors, changed_lines = bus_factor(commits)
+    return {
+        "repository": os.path.abspath(repo),
+        "commit_count": len(commits),
+        "first_commit": commits[-1]["time"].isoformat(),
+        "latest_commit": commits[0]["time"].isoformat(),
+        "hotspots": [
+            {"path": path, "commits": count, "changed_lines": lines}
+            for path, count, lines in hotspots(commits, top)
+        ],
+        "bus_factor": {
+            "authors_needed": factor,
+            "changed_lines": changed_lines,
+            "authors": [{"name": name, "changed_lines": lines}
+                        for name, lines in authors.most_common()],
+        },
+        "work_rhythm": work_rhythm(commits),
+        "stale_files": [
+            {"path": path, "days_since_change": age}
+            for path, age in stale_files(repo, commits, top)
+        ],
+    }
+
+
 def main():
     parser = argparse.ArgumentParser(description="Dig through a git repo's history.")
     parser.add_argument("repo", nargs="?", default=".", help="path to a git repository")
     parser.add_argument("--top", type=int, default=8, help="rows per section")
+    parser.add_argument("--json", dest="json_path", help="also write dashboard data to this JSON file")
     args = parser.parse_args()
     print(render(args.repo, args.top))
+    if args.json_path:
+        with open(args.json_path, "w", encoding="utf-8") as output:
+            json.dump(structured_report(args.repo, args.top), output, indent=2)
+        print(f"\nDashboard data written to {args.json_path}")
 
 
 if __name__ == "__main__":

@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Git Archaeologist · Report</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">LOCAL REPOSITORY ANALYSIS</p>
+      <h1>Git Archaeologist</h1>
+      <p>Explore commit hotspots, contributor concentration, work rhythm, and stale files.</p>
+      <label class="upload">Open analysis JSON <input id="report-file" type="file" accept="application/json,.json"></label>
+      <p id="status" role="status">Generate a report with <code>--json report.json</code>, then open it here.</p>
+    </header>
+    <section id="summary" class="cards" aria-live="polite"></section>
+    <section class="panel"><h2>File hotspots</h2><div id="hotspots" class="table-wrap"></div></section>
+    <section class="panel"><h2>Contributor changes</h2><div id="authors" class="table-wrap"></div></section>
+    <section class="panel"><h2>Activity by weekday and time</h2><div id="rhythm" class="rhythm"></div></section>
+    <section class="panel"><h2>Stale tracked files</h2><div id="stale" class="table-wrap"></div></section>
+    <footer>Analysis stays in this browser tab. Review author and path data before sharing a report.</footer>
+  </main>
+</body>
+</html>

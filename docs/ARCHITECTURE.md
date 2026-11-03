@@ -1,15 +1,11 @@
 # Architecture
 
-The command-line entry point parses arguments and calls the core functions in the
-project module. The typing demo also separates its HTTP interface from timing
-features. Plain Python data structures keep core behavior usable from tests and scripts.
+`git_archaeologist.py` calls the local Git executable and produces terminal output plus JSON report data. The offline page in `dashboard/` uses HTML, CSS, and JavaScript to render a report selected by the user. It makes no network requests and modifies no analyzed repository.
 
 ## Main workflow
 
-python git_archaeologist.py /path/to/repository --top 8
+```bash
+python git_archaeologist.py /path/to/repository --top 8 --json report.json
+```
 
-## Design choices
-
-- Standard library only, so the algorithm and input handling remain inspectable.
-- Deterministic seeds or local files are used where the workflow supports them.
-- Output is intended for learning and review, not production security decisions.
+Open `dashboard/index.html` and choose the generated JSON file.
